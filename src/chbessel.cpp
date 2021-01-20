@@ -8,124 +8,78 @@
 
 using namespace std;
 
-Bess::Bess(): d(2.),  ak({1.2201515410329777e+00,
-	   -3.1448101311964500e-02,
-	    1.5698838857300533e-03,
-	   -1.2849549581627802e-04,
-	    1.3949813718876499e-05,
-	   -1.8317555227191195e-06,
-	    2.7668136394450150e-07,
-	   -4.6604898976879476e-08,
-	    8.5740340174142259e-09,
-	   -1.6975345093890615e-09,
-	    3.5773972814003284e-10,
-	   -7.9574892444773969e-11,
-	    1.8559491149549265e-11,
-	   -4.5145978833745191e-12,
-	    1.1403405882073442e-12,
-	   -2.9800969231481783e-13,
-	    8.0328907750683742e-14,
-	   -2.2275133267462963e-14,
-	    6.3400764762766458e-15,
-	   -1.8485933779209071e-15,
-	    5.5120559994043333e-16,
-	   -1.6782311257549006e-16
-}), ck({1.1206780274986525e+00,
-	   -1.1715459069850548e-01,
-	    1.3036970236823027e-02,
-	   -1.9806761821353283e-03,
-	    3.6376878778932641e-04,
-	   -7.6299030718489181e-05,
-	    1.7691407526436762e-05,
-	   -4.4412599633740433e-06,
-	    1.1899212195550536e-06,
-	   -3.3672827874851224e-07,
-	    9.9858504718735408e-08,
-	   -3.0845382476077599e-08,
-	    9.8762264407071931e-09,
-	   -3.2649783182163052e-09,
-	    1.1108335763913329e-09,
-	   -3.8789825589294646e-10,
-	    1.3870353745126009e-10,
-	   -5.0687673062241771e-11,
-	    1.8898287875308313e-11,
-	   -7.1779913917234740e-12,
-	    2.7738142687119739e-12,
-	   -1.0892937934539412e-12,
-	    4.3427063743150941e-13,
-	   -1.7560032645303451e-13,
-	    7.1958402502578853e-14,
-	   -2.9861094323682945e-14,
-	    1.2540208296211895e-14,
-	   -5.3261294841264028e-15,
-	    2.2865611125307969e-15,
-	   -9.9173250041067941e-16,
-	    4.3435161400121426e-16,
-	   -1.9201449922763557e-16
-
-}), sNa(ak.size()), sNc(ck.size()), Na(sNa-1), Nc(sNc-1), yya(sNa+2, 0.), yyc(sNc+2, 0.) {};
-
-Bess::Bess(const int n, const double dd):  d(dd), ak(fak(n, n, d)),
-		ck(fck(n, n, d, 0.)),  sNa(ak.size()), sNc(ck.size()), Na(sNa-1),
-		Nc(sNc-1), yya(sNa+2, 0.), yyc(sNc+2, 0.), ch(sNc+1, 1.){};
-
-double Bess::k0f(const double x) {
-	double z = d/x;
-	ch[0] = 1.;
-	ch[1] = 2.*z-1.;
-	for (int i=2; i<=sNa; ++i) {
-		ch[i] = 2.*(2.*z-1)*ch[i-1] - ch[i-2];
+vector<long double> Bess::_coef() {
+	vector<long double> ans(MAXIT_IKBESS);
+	long double dum;
+	long double inv_k_fact = 1.;
+	for (int i = 1; i < MAXIT_IKBESS; ++i) {
+		dum = 1./(long double)i;
+		inv_k_fact *= dum;
+		ans[i] = 1./(2.*i + 1.)*inv_k_fact*inv_k_fact;
 	}
-	double sum=0.;
-	for (int i=sNa; i>=0; --i) {
-		sum += ch[i]*ak[i];
-	}
-	return exp(-x)/sqrt(x)*sum;
+	return ans;
 }
 
-double Bess::ik0f(const double x) {
-	double z = d/x;
-	ch[0] = 1.;
-	ch[1] = 2.*z-1.;
-		for (int i=2; i<=sNc; ++i) {
-			ch[i] = 2.*(2.*z-1)*ch[i-1] - ch[i-2];
+vector<long double> Bess::_ns() {
+	vector<long double> ans(MAXIT_IKBESS);
+	long double inv_n_sum = 0.;
+	long double dum;
+	for (int i = 1; i < MAXIT_IKBESS; ++i) {
+		dum = 1./(long double)i;
+		inv_n_sum += dum;
+		ans[i] = inv_n_sum;
 	}
-	double sum = 0.;
-	for (int i=sNc; i>=0; --i) {
-			sum += ch[i]*ck[i];
-	}
-	return exp(-x)/sqrt(x)*sum;
+	return ans;
 }
 
-double Bess::ik0ch(const double x) {
-	double z = d/x;
-	double alpha = 2.*(2.*z-1.);
-	double beta = -1.;
-	vector<double> yy(sNc+2, 0.);
-	for (int k = Nc; k >= 1; k--) {
-		yy[k] = alpha*yy[k+1]+beta*yy[k+2]+ck[k];
+
+Bess::Bess(const int n, const int m, const double dd): d(dd), N(n), M(m),
+		ak(fak(N, N, d)), ck(fck(M, M, d, 0.)), cha(N+1, 1.), chc(M+1, 1.),
+		coef(_coef()), ns(_ns()) {};
+
+long double Bess::_ik02(const double x) {
+	long double xO2=0.5*x;
+	const long double A = -(log(xO2) + EUL_GAMMA_LD);
+	long double xO2sq = xO2*xO2;
+	long double sum = 0.;
+	for (int i = MAXIT_IKBESS-1; i>= 1; i--) {
+		sum = xO2sq*(coef[i]*(A+1./(2.*i+1.)+ns[i]) + sum);
 	}
-	return exp(-x)/sqrt(x)*(beta*yy[2] + alpha*yy[1] + ck[0]);
+	return x*(A+1.+sum);
+}
+
+double Bess::ik02(const double x) {
+	if (x == 0.) return PI2;
+	return PI2 - _ik02(x);
 }
 
 double Bess::_k0(const double x) {
-	if (x < d) throw;
-	double z = x/d;
+	double z = d/x;
 	double z2 = 2.*(2.*z-1.);
-	for(int k=Na; k<=1; --k) {
-		yya[k] = z2*yya[k+1] - yya[k+2] + ak[k];
+	cha[1] = (2.*z-1.);
+	for (int i = 2; i<=N; ++i) {
+		cha[i] = z2*cha[i-1] - cha[i-2];
 	}
-	return z2*yya[1] - yya[2] + ak[0];
+	double sum = 0.;
+	for (int i = N; i >= 0; --i) {
+		sum += cha[i]*ak[i];
+	}
+	return sum;
 }
 
 double Bess::_ik0(const double x) {
-	if (x<d) throw;
-	double z = x/d;
-	double z2 = 2.*(2.*z-1.);
-	for(int k=Nc; k<=1; --k) {
-		yyc[k] = z2*yyc[k+1] - yyc[k+2] + ck[k];
+	double z = d/x;
+	double z2 = 2.*(2*z-1.);
+	chc[0] = 1;
+	chc[1] = (2.*z-1.);
+	for (int i = 2; i <= M; ++i) {
+		chc[i] = z2*chc[i-1] - chc[i-2];
 	}
-	return z2*yyc[1] - yyc[2] + ck[0];
+	double sum = 0.;
+	for (int i = M; i>=0; --i) {
+		sum += chc[i]*ck[i];
+	}
+	return sum;
 }
 
 double Bess::k0(const double x) {
@@ -133,7 +87,18 @@ double Bess::k0(const double x) {
 }
 
 double Bess::ik0(const double x) {
+	if (x < 2.) return ik02(x);
 	return exp(-x)/sqrt(x)*_ik0(x);
+}
+
+double Bess::ikab(const double x1, const double x2) {
+	if (x2 < 2.) {
+		return _ik0(x2) - _ik0(x1);
+	} else if (x1 < 2. && x2 >=2.) {
+		return  (PI2 - _ik0(x1)) - ik0(x2) ;
+	} else {
+		return ik0(x1) - ik0(x2);
+	}
 }
 
 vector<double> Bess::fak(const int m, const int n, const double d) {
@@ -180,7 +145,7 @@ vector<__float128> Bess::fakq(const int m, const int n, const __float128 d, cons
 }
 
 vector<__float128> Bess::fckq(const int m, const int n, const __float128 d, const __float128 mu, const __float128 multt) {
-	vector<__float128> ak = fakq(n+4, 5*n, d);
+	vector<__float128> ak = fakq(n+3, n+3, d);
 	vector<__float128> dk(n+4, 0.q);
 	vector<__float128> eek(n+4, 0.q);
 	__float128 ek = 2.q;

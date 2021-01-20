@@ -16,5 +16,6 @@
 #include <utility>
 #include <limits>
 
-void Test_ik0_2_40();
+void Test_ik0_2_40(const double d, const double xmax, const int kmin);
+void Tests_ik0_0_2();
 
