@@ -42,6 +42,7 @@ struct Bess {
 	const int sNa, sNc, Na, Nc;
 	std::vector<double> yya, yyc;
 	std::vector<double> ch;
+	double ik0ch(const double x);
 };
 
 

@@ -97,6 +97,17 @@ double Bess::ik0f(const double x) {
 	return exp(-x)/sqrt(x)*sum;
 }
 
+double Bess::ik0ch(const double x) {
+	double z = d/x;
+	double alpha = 2.*(2.*z-1.);
+	double beta = -1.;
+	vector<double> yy(sNc+2, 0.);
+	for (int k = Nc; k >= 1; k--) {
+		yy[k] = alpha*yy[k+1]+beta*yy[k+2]+ck[k];
+	}
+	return exp(-x)/sqrt(x)*(beta*yy[2] + alpha*yy[1] + ck[0]);
+}
+
 double Bess::_k0(const double x) {
 	if (x < d) throw;
 	double z = x/d;

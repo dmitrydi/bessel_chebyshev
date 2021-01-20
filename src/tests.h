@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <math.h>
 #include <utility>
+#include <limits>
 
 void Test_ik0_2_40();
 

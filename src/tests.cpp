@@ -10,33 +10,30 @@
 using namespace std;
 
 void Test_ik0_2_40() {
-	const int N = 32;
 	const double d = 2.;
-	const double ROUND = 100.;
-
-	Bess bess(N, d);
-
-	ifstream dfile("./data/data_ik0_2_40.txt");
-
-	pair<double, double> max_eps_pair = {0., -1};
-
-	if (dfile) {
-	string dline;
-		while (getline(dfile, dline)) {
-			istringstream is(dline);
-			string x_, val_;
-			getline(is, x_, ',');
-			getline(is, val_);
-			double x = round(stod(x_)*ROUND)/ROUND;
-			double expected = stod(val_);
-			double y = bess.ik0f(x);
-			double eps = abs(y-expected)/expected;
-			if (eps > max_eps_pair.first) {
-				max_eps_pair = {eps, x};
+	for (int k = 20; k<= 40; k+=2){
+		Bess bess(k, d);
+		ifstream dfile("./data/data_ik0_2_40.txt");
+		pair<double, double> max_eps_pair = {0., -1};
+		if (dfile) {
+		string dline;
+			while (getline(dfile, dline)) {
+				istringstream is(dline);
+				string x_, val_;
+				getline(is, x_, ',');
+				getline(is, val_);
+				double x = stod(x_);
+				double expected = stod(val_);
+				double y = bess.ik0f(x);
+				double eps = abs(y-expected)/expected;
+				if (eps > max_eps_pair.first) {
+					max_eps_pair = {eps, x};
+				}
 			}
 		}
+		cout <<"k = " << k << ", x = " << max_eps_pair.second  << ", max eps = " << max_eps_pair.first  << "\n";
 	}
-	cout << "max eps = " << max_eps_pair.first << ", x = " << max_eps_pair.second;
+	cout << numeric_limits<double>::epsilon();
 }
 
 
