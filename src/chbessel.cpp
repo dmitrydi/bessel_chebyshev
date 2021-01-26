@@ -42,6 +42,8 @@ double Bess::num_ik0ab(const double x1, const double x2) {
 
 
 long double Bess::_ik02(const double x) {
+	if (x < 0.) throw;
+	if (x <= TINY) return 0.;
 	long double xO2=0.5*x;
 	const long double A = -(log(xO2) + EUL_GAMMA_LD);
 	long double xO2sq = xO2*xO2;

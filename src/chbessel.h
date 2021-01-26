@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <quadmath.h>
+#include <limits>
 #include "bessel.h"
 #include "qgaus.h"
 #include <cmath>
@@ -19,6 +20,7 @@ static const double EUL_GAMMA_D = 0.5772'1566'4901'5329;
 static const long double EUL_GAMMA_LD = 0.5772'1566'4901'5328'6;
 static const __float128 PI2Q = 1.5707963267948966192313216916397514q;
 static const __float128 SQRT_PI2Q = 1.2533141373155002512078826424055226q;
+static const double TINY = std::numeric_limits<double>::min();
 
 
 struct Bess {
