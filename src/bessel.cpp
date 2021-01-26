@@ -7,6 +7,8 @@
 
 #include "bessel.h"
 
+namespace FastBessel {
+
 Bessik::Bessik() {};
 
 const double Bessik::i0p[]={9.999999999999997e-1,2.466405579426905e-1,
@@ -192,4 +194,4 @@ double BessK0::operator()(const double x) {
 	return bess.k0(x);
 }
 
-
+}

@@ -14,6 +14,8 @@
 #include <quadmath.h>
 #include <utility>
 
+namespace FastBessel {
+
 struct Bessik {
 	Bessik();
 	static const double i0p[14],i0q[5],i0pp[5],i0qq[6];
@@ -47,4 +49,4 @@ public:
 	BessK0();
 	double operator()(const double x);
 };
-
+}

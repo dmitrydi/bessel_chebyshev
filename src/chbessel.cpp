@@ -8,6 +8,8 @@
 
 using namespace std;
 
+namespace FastBessel {
+
 vector<long double> Bess::_coef() {
 	vector<long double> ans(MAXIT_IKBESS);
 	long double dum;
@@ -74,6 +76,7 @@ double Bess::_k0(const double x) {
 }
 
 double Bess::_ik0(const double x) {
+	if (x < d) throw;
 	double z = d/x;
 	double z2 = 2.*(2*z-1.);
 	chc[0] = 1;
@@ -193,6 +196,6 @@ vector<__float128> Bess::fckq(const int m, const int n, const __float128 d, cons
 	return ans;
 }
 
-
+}
 
 

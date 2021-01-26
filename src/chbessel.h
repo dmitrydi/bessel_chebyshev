@@ -14,6 +14,8 @@
 #include "qgaus.h"
 #include <cmath>
 
+namespace FastBessel {
+
 static const double PI = 3.141592653589793;
 static const long double PI2 = 1.5707'9632'6794'8966'2;
 static const double EUL_GAMMA_D = 0.5772'1566'4901'5329;
@@ -51,4 +53,4 @@ struct Bess {
 	double num_ik0ab(const double x1, const double x2);
 };
 
-
+}

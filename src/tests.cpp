@@ -11,6 +11,8 @@
 
 using namespace std;
 
+using namespace FastBessel;
+
 struct Ans {
 	double x0;
 	double dx;
