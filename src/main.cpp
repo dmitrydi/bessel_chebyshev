@@ -12,9 +12,21 @@
 #include "auxillary.h"
 #include "profile.h"
 #include "tests.h"
+#include "bessel.h"
+#include "qgaus.h"
+
 using namespace std;
 
+const int MAXIT_IKBESS = 20;
+
+struct Dum {
+	vector<double> coefs;
+	vector<double> ns;
+	double ans;
+};
+
+
 int main() {
-	Tests_ik0_0_2();
-	Test_ik0_2_40(2., 40., 30);
+	Test_accuracy();
+	Test_speed();
 }

@@ -1,0 +1,8 @@
+for eps < 1e-14
+
+if x <=0.1 use chebysheb
+if x > 0.1 {
+	if (dx <= 0.5) use gauss_20
+	else use chebyshev_34
+}
+

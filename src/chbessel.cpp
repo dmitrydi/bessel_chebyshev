@@ -32,10 +32,14 @@ vector<long double> Bess::_ns() {
 	return ans;
 }
 
-
 Bess::Bess(const int n, const int m, const double dd): d(dd), N(n), M(m),
 		ak(fak(N, N, d)), ck(fck(M, M, d, 0.)), cha(N+1, 1.), chc(M+1, 1.),
-		coef(_coef()), ns(_ns()) {};
+		coef(_coef()), ns(_ns()), bess(), gs(GAUSS_POINTS) {};
+
+double Bess::num_ik0ab(const double x1, const double x2) {
+	return gs.Integrate(bess, x1, x2);
+}
+
 
 long double Bess::_ik02(const double x) {
 	long double xO2=0.5*x;
@@ -45,7 +49,7 @@ long double Bess::_ik02(const double x) {
 	for (int i = MAXIT_IKBESS-1; i>= 1; i--) {
 		sum = xO2sq*(coef[i]*(A+1./(2.*i+1.)+ns[i]) + sum);
 	}
-	return x*(A+1.+sum);
+	return x*A+x+x*sum;
 }
 
 double Bess::ik02(const double x) {
@@ -91,11 +95,18 @@ double Bess::ik0(const double x) {
 	return exp(-x)/sqrt(x)*_ik0(x);
 }
 
-double Bess::ikab(const double x1, const double x2) {
+double Bess::ik0ab(const double x1, const double x2) {
+	if (x1 <= 0.1 || (x2-x1) > 0.5) {
+		return analytic_ik0ab(x1, x2);
+	}
+	return num_ik0ab(x1, x2);
+}
+
+double Bess::analytic_ik0ab(const double x1, const double x2) {
 	if (x2 < 2.) {
-		return _ik0(x2) - _ik0(x1);
+		return _ik02(x2) - _ik02(x1);
 	} else if (x1 < 2. && x2 >=2.) {
-		return  (PI2 - _ik0(x1)) - ik0(x2) ;
+		return  (PI2 - _ik02(x1)) - ik0(x2) ;
 	} else {
 		return ik0(x1) - ik0(x2);
 	}
