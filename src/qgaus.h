@@ -17,7 +17,7 @@ struct GaussIntegrator {
 	std::vector<double> x, w;
 	explicit GaussIntegrator(const int n_);
 	template <class T>
-	double Integrate(T& func, const double a, const double b) {
+	double Integrate(const T& func, const double a, const double b) const {
 		double xm=0.5*(b+a);
 		double xr=0.5*(b-a);
 		double s=0;

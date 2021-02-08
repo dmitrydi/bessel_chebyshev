@@ -8,7 +8,163 @@
 
 using namespace std;
 
+namespace Chebyshev {
+Poly::Poly(): _coefs({}), _pwr(0) {
+}
+
+Poly::Poly(const vector<int64_t> coefs): _coefs(coefs), _pwr(_coefs.size()) {}
+vector<int64_t> Poly::GetCoefs() const {
+	return _coefs;
+}
+
+Poly::Poly(const Poly& other) {
+	_coefs = other._coefs;
+	_pwr = other._pwr;
+}
+
+Poly Poly::multx(const int n) const {
+	vector<int64_t> ans(_pwr+n, 0);
+	for (int i = 0; i < _pwr; ++i) {
+		ans[i+n] = this->_coefs[i];
+	}
+	return Poly(ans);
+};
+
+Poly Poly::operator*(const int64_t val) const {
+	Poly ans(*this);
+	for (auto& cf: ans._coefs) {
+		cf *= val;
+	}
+	return ans;
+}
+
+Poly Poly::operator+(const Poly& other) const {
+	if (_pwr > other._pwr) {
+		Poly ans(*this);
+		for (int i = 0; i < other._pwr; ++i) {
+			ans._coefs[i] += other._coefs[i];
+		}
+		return ans;
+	} else {
+		Poly ans(other);
+		for (int i = 0; i < _pwr; ++i) {
+			ans._coefs[i] += _coefs[i];
+		}
+		return ans;
+	}
+
+}
+
+Poly Poly::operator-(const Poly& other) const {
+	if (_pwr > other._pwr) {
+		Poly ans(*this);
+		for (int i = 0; i < other._pwr; ++i) {
+			ans._coefs[i] -= other._coefs[i];
+		}
+		return ans;
+	} else {
+		Poly ans(other);
+		for (int i = 0; i < _pwr; ++i) {
+			ans._coefs[i] -= _coefs[i];
+		}
+		return ans;
+	}
+
+}
+
+Poly Poly::operator*(const Poly& other) const {
+	Poly ans;
+	for (int i = 0; i < other._pwr; ++i) {
+		Poly dum = (this->multx(i))*other._coefs[i];
+		ans = ans + dum;
+	}
+	return ans;
+}
+
+};
+
+std::ostream& operator<<(std::ostream& os, __float128 x) {
+	int width = 22;
+	char buf[128];
+	 quadmath_snprintf (buf, sizeof buf, "%-#*.14Qe", width, x); //"%+-#*.17Qe"
+	 os << buf;
+	 return os;
+
+}
+
+ostream& operator<<(ostream& os, const Chebyshev::Poly& p) {
+	int n = p._pwr - 1;
+	for (auto it = p._coefs.rbegin(); it != p._coefs.rend(); ++it, n--) {
+		if (*it != 0) {
+			if (it == p._coefs.rbegin()) {
+				os << *it << "x^" << n;
+			} else {
+				os << ' ';
+				if (*it > 0) {
+					os << '+';
+				} else {
+					os << '-';
+				}
+				os << ' ';
+				os << abs(*it);
+				if (n>0) os << "x^" << n;
+			}
+		}
+	}
+	return os;
+}
+
+
 namespace FastBessel {
+
+double Stupid_ik0(const double x) {
+	double z = 2.0/x;
+	return
+			1.25331413731550e+00+
+			z*(-3.91660667890412e-01+
+			z*(3.15776408289850e-01+
+			z*(-4.06194424195295e-01+
+			z*(7.19597732003498e-01+
+			z*(-1.62708622337386e+00+
+			z*(4.46581915059184e+00+
+			z*(-1.42188765206382e+01+
+			z*(4.97110608920295e+01+
+			z*(-1.78790459190384e+02+
+			z*(6.21256867237806e+02+
+			z*(-1.98596426994130e+03+
+			z*(5.65054653532254e+03+
+			z*(-1.40148864771337e+04+
+			z*(2.99068912288121e+04+
+			z*(-5.44194703279499e+04+
+			z*(8.38397009322609e+04+
+			z*(-1.08611516820013e+05+
+			z*(1.17395578367076e+05+
+			z*(-1.04843244388150e+05+
+			z*(7.63708826316075e+04+
+			z*(-4.45748586206830e+04+
+			z*(2.03233348896703e+04+
+			z*(-6.96738114384029e+03+
+			z*(1.68804707483831e+03+
+			z*(-2.57529748166367e+02+
+			z*1.85968591391546e+01)))))))))))))))))))))))));
+}
+
+double Stupid_ik02(const double x) {
+	double z = 2./x;
+	double dum = s_cf[26];
+	for (int i = 25; i >= 0; --i) {
+		dum = s_cf[i] + z*dum;
+	}
+	return dum;
+}
+
+double ik0ab_stupid(const double x1, const double x2) {
+	double z1 = 2./x1, z2 = 2./x2;
+	double sum1, sum2;
+	STUPID_BESS(z1, sum1);
+	STUPID_BESS(z2, sum2);
+	return exp(-x1)/sqrt(x1)*sum1 - exp(-x2)/sqrt(x2)*sum2;
+}
 
 vector<long double> Bess::_coef() {
 	vector<long double> ans(MAXIT_IKBESS);
@@ -38,12 +194,12 @@ Bess::Bess(const int n, const int m, const double dd): d(dd), N(n), M(m),
 		ak(fak(N, N, d)), ck(fck(M, M, d, 0.)), cha(N+1, 1.), chc(M+1, 1.),
 		coef(_coef()), ns(_ns()), bess(), gs(GAUSS_POINTS) {};
 
-double Bess::num_ik0ab(const double x1, const double x2) {
+double Bess::num_ik0ab(const double x1, const double x2) const {
 	return gs.Integrate(bess, x1, x2);
 }
 
 
-long double Bess::_ik02(const double x) {
+long double Bess::_ik02(const double x) const {
 	if (x < 0.) throw;
 	if (x <= TINY) return 0.;
 	long double xO2=0.5*x;
@@ -56,58 +212,111 @@ long double Bess::_ik02(const double x) {
 	return x*A+x+x*sum;
 }
 
-double Bess::ik02(const double x) {
+double Bess::ik02(const double x) const {
 	if (x == 0.) return PI2;
 	return PI2 - _ik02(x);
 }
 
-double Bess::_k0(const double x) {
-	double z = d/x;
-	double z2 = 2.*(2.*z-1.);
-	cha[1] = (2.*z-1.);
-	for (int i = 2; i<=N; ++i) {
-		cha[i] = z2*cha[i-1] - cha[i-2];
-	}
-	double sum = 0.;
-	for (int i = N; i >= 0; --i) {
-		sum += cha[i]*ak[i];
-	}
-	return sum;
-}
+//double Bess::_k0(const double x) {
+//	double z = d/x;
+//	double z2 = 2.*(2.*z-1.);
+//	cha[1] = (2.*z-1.);
+//	for (int i = 2; i<=N; ++i) {
+//		cha[i] = z2*cha[i-1] - cha[i-2];
+//	}
+//	double sum = 0.;
+//	for (int i = N; i >= 0; --i) {
+//		sum += cha[i]*ak[i];
+//	}
+//	return sum;
+//}
 
-double Bess::_ik0(const double x) {
+double Bess::_k0(const double x) const {
 	if (x < d) throw;
 	double z = d/x;
 	double z2 = 2.*(2*z-1.);
-	chc[0] = 1;
-	chc[1] = (2.*z-1.);
-	for (int i = 2; i <= M; ++i) {
-		chc[i] = z2*chc[i-1] - chc[i-2];
-	}
-	double sum = 0.;
-	for (int i = M; i>=0; --i) {
-		sum += chc[i]*ck[i];
+	double ch_0 = 1.;
+	double ch_1 = (2.*z-1.);
+	double ch_2;
+	double sum = ch_0*ak[0] + ch_1*ak[1];
+	for (int i = 2; i <=N; ++i) {
+		ch_2 = z2*ch_1 - ch_0;
+		sum += ch_2*ak[i];
+		ch_0 = ch_1;
+		ch_1 = ch_2;
 	}
 	return sum;
 }
 
-double Bess::k0(const double x) {
+//double Bess::_ik0(const double x) {
+//	if (x < d) throw;
+//	double z = d/x;
+//	double z2 = 2.*(2*z-1.);
+//	chc[0] = 1;
+//	chc[1] = (2.*z-1.);
+//	for (int i = 2; i <= M; ++i) {
+//		chc[i] = z2*chc[i-1] - chc[i-2];
+//	}
+//	double sum = 0.;
+//	for (int i = M; i>=0; --i) {
+//		sum += chc[i]*ck[i];
+//	}
+//	return sum;
+//}
+
+double Bess::dum(const double x) {
+	return SQR(x);
+}
+
+double Bess::dum2(const double x) {
+	double sum = 0;
+	//int i;
+	CYCLE(x);
+	return sum;
+}
+
+double Bess::ik0ab_macro(const double x1, const double x2) const {
+	double sum1 = 0., sum2 = 0.;
+	double z_1 = d/x1, z_2 = d/x2;
+	CACL_CHEB_SUM(z_1, sum1);
+	CACL_CHEB_SUM(z_2, sum2);
+	return exp(-x1)/sqrt(x1)*sum1 - exp(-x2)/sqrt(x2)*sum2;
+}
+
+double Bess::_ik0(const double x) const {
+	if (x < d) throw;
+	double z = d/x;
+	double z2 = 2.*(2*z-1.);
+	double ch_0 = 1.;
+	double ch_1 = (2.*z-1.);
+	double ch_2;
+	double sum = ch_0*ck[0] + ch_1*ck[1];
+	for (int i = 2; i <=M; ++i) {
+		ch_2 = z2*ch_1 - ch_0;
+		sum += ch_2*ck[i];
+		ch_0 = ch_1;
+		ch_1 = ch_2;
+	}
+	return sum;
+}
+
+double Bess::k0(const double x) const {
 	return exp(-x)/sqrt(x)*_k0(x);
 }
 
-double Bess::ik0(const double x) {
+double Bess::ik0(const double x) const {
 	if (x < 2.) return ik02(x);
 	return exp(-x)/sqrt(x)*_ik0(x);
 }
 
-double Bess::ik0ab(const double x1, const double x2) {
+double Bess::ik0ab(const double x1, const double x2) const {
 	if (x1 <= 0.1 || (x2-x1) > 0.5) {
 		return analytic_ik0ab(x1, x2);
 	}
 	return num_ik0ab(x1, x2);
 }
 
-double Bess::analytic_ik0ab(const double x1, const double x2) {
+double Bess::analytic_ik0ab(const double x1, const double x2) const {
 	if (x2 < 2.) {
 		return _ik02(x2) - _ik02(x1);
 	} else if (x1 < 2. && x2 >=2.) {

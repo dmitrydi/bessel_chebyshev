@@ -64,64 +64,64 @@ const double Bessik::k1qq[]={1.0,1.125154514806458e1,4.427488496597630e1,
 7.616113213117645e1,5.863377227890893e1,1.850303673841586e1,
 1.857244676566022,2.538540887654872e-2};
 
-double Bessik::i0(const double x) {
+double Bessik::i0(const double x) const {
 // Returns the modified Bessel function I0(x) for any real x
-	ax = abs(x);
+	double ax = abs(x);
 	if (ax < 15.0) {
-		y = x*x;
+		double y = x*x;
 		return poly(i0p, 13, y)/poly(i0q, 4, 225. - y);
 	} else {
-		z = 1.0 - 15.0/ax;
+		double z = 1.0 - 15.0/ax;
 		return exp(ax)*poly(i0pp,4,z)/(poly(i0qq,5,z)*sqrt(ax));
 	}
 }
 
-double Bessik::i1(const double x) {
+double Bessik::i1(const double x) const {
 // Returns the modified Bessel function I1(x) for any real x
-	ax = abs(x);
+	double ax = abs(x);
 	if (ax < 15.0) {
-		y = x*x;
+		double y = x*x;
 		return x*poly(i1p,13,y)/poly(i1q,4,225.-y);
 	} else {
-		z=1.0-15.0/ax;
+		double z=1.0-15.0/ax;
 		double ans=exp(ax)*poly(i1pp,4,z)/(poly(i1qq,5,z)*sqrt(ax));
 		return x > 0.0 ? ans : -ans;
 	}
 }
 
-double Bessik::k0(const double x) {
+double Bessik::k0(const double x) const {
 // Returns the modified Bessel function K0(x) for positive real x.
 	if (x <= 0.0) {
 		throw std::invalid_argument("x <= 0 in Bessik::k0 " + std::to_string(x));
 	}
 	if (x <= 1.0) {
-		z = x*x;
-		term = poly(k0pi,4,z)*log(x)/poly(k0qi,2,1.-z);
+		double z = x*x;
+		double term = poly(k0pi,4,z)*log(x)/poly(k0qi,2,1.-z);
 		return poly(k0p,4,z)/poly(k0q,2,1.-z)-term;
 	} else {
-		z = 1.0/x;
+		double z = 1.0/x;
 		return exp(-x)*poly(k0pp,7,z)/(poly(k0qq,7,z)*sqrt(x));
 	}
 }
 
-double Bessik::k1(const double x) {
+double Bessik::k1(const double x) const {
 // Returns the modified Bessel function K1(x) for positive real x.
 	if (x <= 0) {
 		throw std::invalid_argument("x <= 0 in Bessik::k1");
 	}
 	if (x <= 1.0) {
-		z=x*x;
-		term = poly(k1pi,4,z)*log(x)/poly(k1qi,2,1.-z);
+		double z=x*x;
+		double term = poly(k1pi,4,z)*log(x)/poly(k1qi,2,1.-z);
 		return x*(poly(k1p,4,z)/poly(k1q,2,1.-z)+term)+1./x;
 	} else {
-		z=1.0/x;
+		double z=1.0/x;
 		return exp(-x)*poly(k1pp,7,z)/(poly(k1qq,7,z)*sqrt(x));
 	}
 }
 
 
 
-inline double Bessik::poly(const double* cof, const int n, const double x) {
+inline double Bessik::poly(const double* cof, const int n, const double x) const {
 	// Evaluate a polynomial
 	double ans = cof[n];
 	for (int i = n - 1; i >= 0; i--) {
@@ -131,7 +131,7 @@ inline double Bessik::poly(const double* cof, const int n, const double x) {
 }
 
 
-double Bessik::kn(const int n, const double x) {
+double Bessik::kn(const int n, const double x) const {
 //Returns the modified Bessel function Kn(x) for positive x and n >= 0
 	if (x <= 0) {
 		throw std::invalid_argument("x <= 0 in Bessik::kn");
@@ -154,7 +154,7 @@ double Bessik::kn(const int n, const double x) {
 	return bk;
 }
 
-double Bessik::in(const int n, const double x) {
+double Bessik::in(const int n, const double x) const {
 // Returns the modified Bessel function In(x) for any real x and n >= 0;
 	if (n < 0) {
 		throw std::invalid_argument("n < 0 in Bessik::in");
@@ -190,7 +190,7 @@ double Bessik::in(const int n, const double x) {
 }
 
 BessK0::BessK0(): bess() {};
-double BessK0::operator()(const double x) {
+double BessK0::operator()(const double x) const {
 	return bess.k0(x);
 }
 
