@@ -10,7 +10,6 @@
 #include <vector>
 #include <quadmath.h>
 #include <limits>
-#include "bessel.h"
 #include "qgaus.h"
 #include <cmath>
 #include <cstdint>
@@ -115,8 +114,12 @@ private:
 	std::vector<__float128> fckq(const int m, const int n, const __float128 d, const __float128 mu, const __float128 multt = 1.q); // same as fck but with quadruple precision
 	const std::vector<double> ak, ck; // coefficients for constructor Bess()
 	const std::vector<long double> coef, ns;
-	BessK0 bess;
-	GaussIntegrator gs;
+	//BessK0 bess;
+	//GaussIntegrator gs;
+	std::vector<double> xgs, wgs; // gauss abscissas and weights
+	static const double k0pi[5],k0qi[3],k0p[5],k0q[3],k0pp[8],k0qq[8];
+	inline double poly(const double* cof, const int n, const double x) const; // Evaluate a polynomial
+
 };
 
 }

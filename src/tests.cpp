@@ -131,3 +131,19 @@ void Test_speed() {
 		cout << ans << endl;
 	}
 }
+
+void Test_speed_bessel() {
+	const int n = 1000000;
+	vector<double> xs = LinSpaced(0.1, 40., n);
+	double ans;
+	Bess bess;
+	std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+	for (auto x: xs) {
+			ans = bess.k0(x);
+	}
+	std::chrono::steady_clock::time_point finish = std::chrono::steady_clock::now();
+	auto dur = finish - start;
+	double t = std::chrono::duration_cast<std::chrono::nanoseconds>(dur).count();
+	cout << "Bess::k0: " << t << " avg: " << t/n << " ns" << endl;
+	cout << ans;
+}

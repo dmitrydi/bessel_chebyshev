@@ -15,7 +15,6 @@
 #include <math.h>
 #include <utility>
 #include <limits>
-#include "bessel.h"
 #include "qgaus.h"
 #include <chrono>
 
@@ -47,4 +46,5 @@ std::vector<DataPoint> ParseDataFile(const std::string& fname,
 
 void Test_accuracy();
 void Test_speed();
+void Test_speed_bessel();
 

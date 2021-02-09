@@ -12,7 +12,6 @@
 #include "auxillary.h"
 #include "profile.h"
 #include "tests.h"
-#include "bessel.h"
 #include "qgaus.h"
 
 using namespace std;
@@ -22,4 +21,5 @@ using namespace FastBessel;
 int main() {
 	Test_accuracy();
 	Test_speed();
+	Test_speed_bessel();
 }
