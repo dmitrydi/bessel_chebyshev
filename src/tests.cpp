@@ -69,19 +69,7 @@ void Test_accuracy() {
 	{
 		double maxeps = 0.;
 		Bess bess;
-		{ LOG_DURATION("fast = false");
-			for (auto p: data) {
-				double y = bess.ik0ab(p.x, p.x+p.dx);
-				double eps = abs(p.val-y)/p.val;
-				if (eps > maxeps) maxeps = eps;
-			}
-		}
-		cout << "max eps: " << maxeps << endl;
-	}
-	{
-		double maxeps = 0.;
-		Bess bess(true);
-		{ LOG_DURATION("fast = true");
+		{ LOG_DURATION("total");
 			for (auto p: data) {
 				double y = bess.ik0ab(p.x, p.x+p.dx);
 				double eps = abs(p.val-y)/p.val;

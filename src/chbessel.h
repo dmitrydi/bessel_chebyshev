@@ -15,6 +15,8 @@
 #include <cstdint>
 #include <iostream>
 
+namespace FastBessel {
+
 #define CALC_CHEB_SUM(x, sum) \
 	{						  \
 		double z = d/x; \
@@ -74,7 +76,7 @@
 			z*1.85968591391546e+01)))))))))))))))))))))))));\
 		};
 
-namespace FastBessel {
+
 
 static const double PI = 3.141592653589793;
 static const long double PI2 = 1.5707'9632'6794'8966'2;
@@ -87,24 +89,26 @@ static const double TINY = std::numeric_limits<double>::min();
 
 class Bess {
 	// calculates modified bessel function of second kind and its integral using Chebyshev polynomial expansion
+    // According to Y. Luke "The special functions and their approximations" Vol I-II
 public:
-	Bess(const bool fast = false, const int n = 34, const int m = 34, const double dd = 2.);
+    // default values in constructor are optimal for 1e-14 relative precision calculation of integrals for 0 <= x <inf. Do not change unless very confident
+	Bess(const int n = 34, const int m = 34, const double d = 2.);
 	//-----------
+	double ik00x(const double x) const; // adaptive for any x > 0
 	double ik00x_ch(const double x) const; // t: [0, x], chebyshev approximation for x >= d;
 	long double ik00x_pwr(const double x) const; // t: [0, x], power approximation for t < d;
-	double ik00x(const double x) const; // adaptive for any x > 0
 	//-----------
+	double ik0ab(const double x1, const double x2) const; // adaptive function uses _ch, _pwr and _num functions;
 	double ik0ab_ch(const double x1, const double x2) const; // t: [a,b], chebyshev approximation for a,b >= d;
 	long double ik0ab_pwr(const double x1, const double x2) const; // t: [a,b], power approximation for a,b < d;
 	double ik0ab_num(const double x1, const double x2) const; // numerical solution using gauss quadrature
-	double ik0ab(const double x1, const double x2) const; // adaptive function uses _ch, _pwr and _num functions;
 	//-----------
 	double _k0(const double x) const; // sqrt(x)*exp(x)*BesselK[0,x], x >= d;
 	double k0(const double x) const; // BesselK[0,x], x >= d
 private:
 	const int MAXIT_IKBESS=20;
 	const int GAUSS_POINTS = 20;
-	const bool is_fast;
+	//const bool is_fast;
 	const double d;
 	const int N, M;
 	std::vector<long double>  _coef(), _ns();

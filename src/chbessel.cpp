@@ -12,7 +12,7 @@ namespace FastBessel {
 
 //---PUBLIC---------
 
-Bess::Bess(const bool fast, const int n, const int m, const double dd): is_fast(fast), d(dd), N(n), M(m),
+Bess::Bess(const int n, const int m, const double dd): d(dd), N(n), M(m),
 		ak(fak(N, N, d)), ck(fck(M, M, d, 0.)),
 		coef(_coef()), ns(_ns()), xgs(GAUSS_POINTS), wgs(GAUSS_POINTS) {
 	gauleg(-1., 1., xgs, wgs);
@@ -86,21 +86,12 @@ double Bess::ik0ab(const double x1, const double x2) const {
 			long double sum1 = 0.;
 			POWER_SUM(x1, sum1);
 			double sum2 = 0.;
-			if (is_fast) {
-				FAST_CHEB_SUM(x2, sum2);
-			} else {
-				CALC_CHEB_SUM(x2, sum2);
-			}
+			CALC_CHEB_SUM(x2, sum2);
 			return (PI2 - sum1) - exp(-x2)/sqrt(x2)*sum2;
 		} else {
 			double sum1 = 0., sum2 = 0.;
-			if (is_fast) {
-				FAST_CHEB_SUM(x1, sum1);
-				FAST_CHEB_SUM(x2, sum2);
-			} else {
-				CALC_CHEB_SUM(x1, sum1);
-				CALC_CHEB_SUM(x2, sum2);
-			}
+            CALC_CHEB_SUM(x1, sum1);
+            CALC_CHEB_SUM(x2, sum2);
 			return exp(-x1)/sqrt(x1)*sum1 - exp(-x2)/sqrt(x2)*sum2;
 		}
 	} else {
